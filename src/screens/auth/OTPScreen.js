@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../services/api';
 
 export default function OTPScreen({ route }) {
-  const { phone } = route.params;
+  const { phone, confirmation } = route.params;
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const inputs = useRef([]);
@@ -36,8 +36,10 @@ export default function OTPScreen({ route }) {
     }
     setLoading(true);
     try {
-      // Test login for now
-      const response = await api.post('/api/auth/test-login', { phone });
+      const result = await confirmation.confirm(otpString);
+      const firebaseToken = await result.user.getIdToken();
+
+      const response = await api.post('/api/auth/firebase-login', { firebaseToken });
       const { token, user } = response.data;
       await AsyncStorage.setItem('token', token);
       dispatch(setAuth({ token, user }));
@@ -61,7 +63,6 @@ export default function OTPScreen({ route }) {
           <Text style={styles.phone}>{phone}</Text>
         </Text>
 
-        {/* OTP Input */}
         <View style={styles.otpContainer}>
           {otp.map((digit, index) => (
             <TextInput

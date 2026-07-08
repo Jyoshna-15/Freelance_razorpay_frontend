@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform
 } from 'react-native';
+import auth from '@react-native-firebase/auth';
 
 export default function PhoneScreen({ navigation }) {
   const [phone, setPhone] = useState('');
@@ -15,9 +16,8 @@ export default function PhoneScreen({ navigation }) {
     }
     setLoading(true);
     try {
-      // For now navigate to OTP with phone
-      // Firebase OTP will be added after setup
-      navigation.navigate('OTP', { phone: `+91${phone}` });
+      const confirmation = await auth().signInWithPhoneNumber(`+91${phone}`);
+      navigation.navigate('OTP', { phone: `+91${phone}`, confirmation });
     } catch (error) {
       Alert.alert('Error', error.message);
     } finally {
@@ -31,14 +31,12 @@ export default function PhoneScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.content}>
-        {/* Logo */}
         <View style={styles.logoContainer}>
           <Text style={styles.logo}>💼</Text>
           <Text style={styles.appName}>FreelancePay</Text>
           <Text style={styles.tagline}>Invoice & Payment Manager</Text>
         </View>
 
-        {/* Form */}
         <View style={styles.form}>
           <Text style={styles.label}>Enter your phone number</Text>
           <View style={styles.phoneInputContainer}>
